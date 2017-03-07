@@ -1,0 +1,6 @@
+foreach(Deletions as (id, date)){
+  DELETE FROM Organizations WHERE NPI=id;
+  DELETE FROM Providers WHERE NPI=id;
+  INSERT INTO Organizations (NIP,NPPES Deactivation Date) VALUES (id,date);
+    INSERT INTO Providers (NIP,NPPES Deactivation Date) VALUES (id,date);
+}
