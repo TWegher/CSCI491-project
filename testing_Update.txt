@@ -1,0 +1,10 @@
+Testing Update:
+After researching ways of creating a subset of the data for testing purposes It doesn’t seem like at this point it will be necessary. There isn’t really a reason to use actual data from the working database for testing functionality. Using the provided schema, it would be much more simple to merely create an arbitrary entry for testing functions such as insertion by inserting the entry then testing to see if the entry exists in the table by using an SQL query. Also using this same idea, it would be just as easy to test functions such as removal, duplicate entries and entries with incorrect formatting.
+
+Tests to be Written at the Moment:
+Insertion
+Removal
+Duplicate Entry
+Incorrect Formatting
+Applying activation file
+Applying deactivation file
