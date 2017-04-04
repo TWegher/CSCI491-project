@@ -26,18 +26,7 @@ public class TableReader
 
     public void readUpdateFile(string fileLocation)
     {
-        //Initialize the StreamReader
-        FileStream fs = File.OpenRead(fileLocation);
-        StreamReader sr = new StreamReader(fs);
-
-        //Reads in the CSV update file, line by line
-        List<Entry> entries = new List<Entry>();
-        while (!sr.EndOfStream)
-        {
-            string line = sr.ReadLine();
-			Entry entry = new Entry (new List<string>(line.Split (',')));
-			entries.Add(entry);
-        }
+        List<Entry> entries = generateEntries(fileLocation);
 
         foreach (Entry curEntry in entries)
         {
@@ -64,7 +53,9 @@ public class TableReader
 
     public void readDeactivationFile(string fileLocation)
     {
+        List<Entry> entries = generateEntries(fileLocation);
 
+        //TODO: finish implementation of Method
     }
 
 	private void updateTable(IDataManager tableManager, Entry entry)
@@ -75,6 +66,24 @@ public class TableReader
 		if (!tryCommand(query)) {
 			tryCommand(tableManager.AddEntity(entry));
 		}  
+    }
+
+    private List<Entry> generateEntries(string fileLocation)
+    {
+        //Initialize the StreamReader
+        FileStream fs = File.OpenRead(fileLocation);
+        StreamReader sr = new StreamReader(fs);
+
+        //Reads in the CSV update file, line by line
+        List<Entry> entries = new List<Entry>();
+        while (!sr.EndOfStream)
+        {
+            string line = sr.ReadLine();
+            Entry entry = new Entry(new List<string>(line.Split(',')));
+            entries.Add(entry);
+        }
+
+        return entries;
     }
 
 	private void deactivateEntity(Entry entry){
