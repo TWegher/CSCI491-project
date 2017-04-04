@@ -20,7 +20,11 @@ public class DeactivationManager : IDataManager
 
     public string AddEntity(Entry entry)
     {
-        throw new NotImplementedException();
+        string command = "INSERT INTO " + tableName + "(NPI, DeactivaitionDate) VALUES (" +
+            entry.NPI + ", '" +
+            entry.deactivationDate + "');";
+
+        return command;
     }
 
     public string UpdateEntity(Entry entry)

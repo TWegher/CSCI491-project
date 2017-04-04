@@ -56,6 +56,10 @@ public class TableReader
         List<Entry> entries = generateEntries(fileLocation);
 
         //TODO: finish implementation of Method
+        //As each entry in the deactivation list is know to be of EntryType.Deactivate, a switch check is unneccesary
+        foreach(Entry curEntry in entries){
+            deactivateEntity(curEntry);
+        }
     }
 
 	private void updateTable(IDataManager tableManager, Entry entry)
@@ -78,6 +82,7 @@ public class TableReader
         List<Entry> entries = new List<Entry>();
         while (!sr.EndOfStream)
         {
+            //TODO: When generating entries for deactivation files, Determine and utilize the applicable stop date
             string line = sr.ReadLine();
             Entry entry = new Entry(new List<string>(line.Split(',')));
             entries.Add(entry);
@@ -93,8 +98,8 @@ public class TableReader
 		if (!tryCommand (query)) {
 			tryCommand (deaManager.AddEntity (entry));
 		}
-		tryCommand(proManager.DeactivateEntity (entry.values [0]));
-		tryCommand(orgManager.DeactivateEntity (entry.values [0]));
+		tryCommand(proManager.DeactivateEntity (entry.NPI));
+		tryCommand(orgManager.DeactivateEntity (entry.NPI));
 	}
 
 	private bool tryCommand(string query){
