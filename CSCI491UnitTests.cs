@@ -22,8 +22,8 @@ public class UnitTest1
     DeactivationManager deaManager = new DeactivationManager("npi_deactivated");
     TableReader tableReader = new TableReader("datasource=127.0.0.1;port=3306;username=root;password=;database=test_database;");
     Entry testEntry = new Entry(new List<string>(new string[]{"123456"}));
-    string updateFileLoc = "UpdateTestSnippit1.csv";
-    string deactivateFileLoc = "UpdateTestSnippit1.csv";
+    string updateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
+    string deactivateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
     //tests for add
     public UnitTest1()
     {
@@ -133,7 +133,7 @@ public class UnitTest1
     {
         tableReader.readUpdateFile(updateFileLoc);
         //use the same file that was used to update, should cause the table to be empty
-        tableReader.readDeactivateFile(deactivateFileLoc);
+        tableReader.readDeactivationFile(deactivateFileLoc);
         conn.Open();
         com.CommandText = "SELECT COUNT(*) FROM organization";
         int result = int.Parse(com.ExecuteScalar().ToString());
@@ -141,13 +141,3 @@ public class UnitTest1
         Assert.AreEqual(result, 0, "testing applying deactivate that should remove the only row causing it to be empty");
     }
 }
-
-
-
-
-
-
-
-
-
-
