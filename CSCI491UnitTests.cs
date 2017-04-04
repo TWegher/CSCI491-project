@@ -37,10 +37,11 @@ public class UnitTest1
     [TestMethod]
     public void testAddOrg()
     {
+        clearDatabase();
         conn.Open();
         testCom =  new MySqlCommand(orgManager.AddEntity(testEntry), conn);
         testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT npi FROM organization WHERE npi == 123456";
+        com.CommandText = "SELECT npi FROM npi_organization_data WHERE npi == 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(result, 123456, "testing add organizer to an empty db");
@@ -49,11 +50,12 @@ public class UnitTest1
     [TestMethod]
     public void testAddDupOrg()
     {
+        clearDatabase();
         conn.Open();
         testCom = new MySqlCommand(orgManager.AddEntity(testEntry), conn);
         testCom.ExecuteNonQuery();
         testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT COUNT(*) FROM organization";
+        com.CommandText = "SELECT COUNT(*) FROM npi_organization_data";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(result, 1, "testing applying duplicate organization");
@@ -63,10 +65,11 @@ public class UnitTest1
     [TestMethod]
     public void testAddProv()
     {
+        clearDatabase();
         conn.Open();
         testCom = new MySqlCommand(proManager.AddEntity(testEntry),conn);
         testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT npi FROM provider WHERE npi == 123456";
+        com.CommandText = "SELECT npi FROM npi_provider_data WHERE npi == 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(result, 123456, "testing adding provider to an empty db");
@@ -75,11 +78,12 @@ public class UnitTest1
     [TestMethod]
     public void testAddDupProv()
     {
+        clearDatabase();
         conn.Open();
         testCom = new MySqlCommand(proManager.AddEntity(testEntry), conn);
         testCom.ExecuteNonQuery();
         testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT COUNT(*) FROM provider";
+        com.CommandText = "SELECT COUNT(*) FROM npi_provider_data";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(result, 1, "testing applying duplicate provider");
@@ -90,6 +94,7 @@ public class UnitTest1
     [TestMethod]
     public void testFindOrg()
     {
+        clearDatabase();
         conn.Open();
         testCom = new MySqlCommand(orgManager.AddEntity(testEntry), conn);
         testCom.ExecuteNonQuery();
@@ -102,6 +107,7 @@ public class UnitTest1
     [TestMethod]
     public void testFindProv()
     {
+        clearDatabase();
         conn.Open();
         testCom = new MySqlCommand(proManager.AddEntity(testEntry), conn);
         testCom.ExecuteNonQuery();
@@ -117,6 +123,7 @@ public class UnitTest1
     [TestMethod]
     public void testUpdate()
     {
+        clearDatabase();
         tableReader.readUpdateFile(updateFileLoc);
         conn.Open();
         testCom = new MySqlCommand(proManager.FindExisting("1205839859"), conn);
@@ -131,13 +138,26 @@ public class UnitTest1
     [TestMethod]
     public void testDeactivate()
     {
+        clearDatabase();
         tableReader.readUpdateFile(updateFileLoc);
         //use the same file that was used to update, should cause the table to be empty
         tableReader.readDeactivationFile(deactivateFileLoc);
         conn.Open();
-        com.CommandText = "SELECT COUNT(*) FROM organization";
+        com.CommandText = "SELECT COUNT(*) FROM npi_organization_data";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(result, 0, "testing applying deactivate that should remove the only row causing it to be empty");
+    }
+
+    private void clearDatabase()
+    {
+        conn.Open();
+        testCom = new MySqlCommand("truncate npi_organization_data");
+        testCom.ExecuteNonQuery();
+        testCom = new MySqlCommand("truncate npi_provider_data");
+        testCom.ExecuteNonQuery();
+        testCom = new MySqlCommand("truncate npi_deactivated");
+        testCom.ExecuteNonQuery();
+        conn.Close();
     }
 }
