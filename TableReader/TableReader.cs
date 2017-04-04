@@ -16,9 +16,13 @@ public class TableReader
     ProviderManager proManager;
     DeactivationManager deaManager;
 
-    public TableReader()
+    public TableReader(string connectionString)
     {
-        databaseConnection = new MySqlConnection(connectionString);
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            this.connectionString = connectionString;
+        } 
+        databaseConnection = new MySqlConnection(this.connectionString);
         orgManager = new OrganizationManager("npi_organization_data");
         proManager = new ProviderManager("npi_provider_data");
         deaManager = new DeactivationManager("npi_deactivated");
