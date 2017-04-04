@@ -8,16 +8,23 @@ public class TableReader
     //Initialize the connection
     string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=nppes_1;";
 
-
-    MySqlConnection databaseConnection = new MySqlConnection(connectionString);
-    MySqlDataReader reader;
+    //MySqlDataReader reader;
+    MySqlConnection databaseConnection;
     MySqlCommand command = new MySqlCommand();
 
-	OrganizationManager orgManager = new OrganizationManager ("npi_organization_data");
-	ProviderManager proManager = new ProviderManager ("npi_provider_data");
-	DeactivationManager deaManager = new DeactivationManager ("npi_deactivated");
+    OrganizationManager orgManager;
+    ProviderManager proManager;
+    DeactivationManager deaManager;
 
-    private void readUpdateFile(string fileLocation)
+    public TableReader()
+    {
+        databaseConnection = new MySqlConnection(connectionString);
+        orgManager = new OrganizationManager("npi_organization_data");
+        proManager = new ProviderManager("npi_provider_data");
+        deaManager = new DeactivationManager("npi_deactivated");
+    }
+
+    public void readUpdateFile(string fileLocation)
     {
         //Initialize the StreamReader
         FileStream fs = File.OpenRead(fileLocation);
@@ -28,7 +35,7 @@ public class TableReader
         while (!sr.EndOfStream)
         {
             string line = sr.ReadLine();
-			Entry entry = new Entry (newList<string>(line.Split (',')));
+			Entry entry = new Entry (new List<string>(line.Split (',')));
 			entries.Add(entry);
         }
 
@@ -55,7 +62,7 @@ public class TableReader
         }
     }
 
-    private void readDeactivationFile()
+    public void readDeactivationFile(string fileLocation)
     {
 
     }
@@ -75,7 +82,7 @@ public class TableReader
 		string query = deaManager.UpdateEntity (entry);
 
 		if (!tryCommand (query)) {
-			tryCommand (deaManager.AddEntity (entry.values [0]));
+			tryCommand (deaManager.AddEntity (entry));
 		}
 		tryCommand(proManager.DeactivateEntity (entry.values [0]));
 		tryCommand(orgManager.DeactivateEntity (entry.values [0]));

@@ -9,12 +9,22 @@ public class DeactivationManager : IDataManager
         this.tableName = tableName;
 	}
 
-    string FindExisting(string NPINumber){
+    public string FindExisting(string NPINumber){
         string query = "SELECT * FROM " + tableName + " WHERE NPI=" + NPINumber + " ;";
         return query;
     }
 
-    string DeactivateEntity(string NPINumber){
- 
+    public string DeactivateEntity(string NPINumber){
+        throw new NotImplementedException();
+    }
+
+    public string AddEntity(Entry entry)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string UpdateEntity(Entry entry)
+    {
+        throw new NotImplementedException();
     }
 }
