@@ -12,19 +12,26 @@ public class UnitTest1
     MySqlCommand testCom;
 
     //create an empty database for testing that is an exact copy but empty
-    //"mysqldump -u username –p  -d database_name|mysql -u username -p new_database";
+    //"mysqldump -u username –p  -d nppes_1|mysql -u username -p test_database";
 
     //establish connection with test database
-    MySqlConnection conn = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=nppes_1;");
-    
+    MySqlConnection initConn = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=nppes_1;");
+    MySqlConnection conn;
     OrganizationManager orgManager = new OrganizationManager("npi_organization_data");
     ProviderManager proManager = new ProviderManager("npi_provider_data");
     DeactivationManager deaManager = new DeactivationManager("npi_deactivated");
-
+    TableReader tableReader = new TableReader("datasource=127.0.0.1;port=3306;username=root;password=;database=test_database;");
     Entry testEntry = new Entry(new List<string>(new string[]{"123456"}));
+    string updateFileLoc = "";
+    string deactivateFileLoc = "";
     //tests for add
     public UnitTest1()
     {
+        initConn.Open();
+        testCom = new MySqlCommand("mysqldump -u root –p  -d nppes_1|mysql -u root -p test_database;", initConn);
+        testCom.ExecuteNonQuery();
+        initConn.Close();
+        conn = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=test_database;");
         com.Connection = conn;
     }
     [TestMethod]
@@ -110,10 +117,12 @@ public class UnitTest1
     [TestMethod]
     public void testUpdate()
     {
-        update();
-        Provider testProv = new Provider();
-        testProv = find(123456);
-        Assert.AreEqual(testProv.npi, 123456, "testing applying an update file on an empty db");
+        tableReader.readUpdateFile(updateFileLoc);
+        conn.Open();
+        testCom = new MySqlCommand(proManager.FindExisting("123456"), conn);
+        int result = int.Parse(testCom.ExecuteScalar().ToString());
+        conn.Close();
+        Assert.AreEqual(result, 123456, "testing applying an update file on an empty db");
     }
 
 
@@ -122,11 +131,13 @@ public class UnitTest1
     [TestMethod]
     public void testDeactivate()
     {
-        update();
+        tableReader.readUpdateFile(updateFileLoc);
         //use the same file that was used to update, should cause the table to be empty
-        deactivate();
+        tableReader.readDeactivateFile(updateFileLoc);
+        conn.Open();
         com.CommandText = "SELECT COUNT(*) FROM organization";
         int result = int.Parse(com.ExecuteScalar().ToString());
+        conn.Close();
         Assert.AreEqual(result, 0, "testing applying deactivate that should remove the only row causing it to be empty");
     }
 }
