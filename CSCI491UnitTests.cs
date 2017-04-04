@@ -22,8 +22,8 @@ public class UnitTest1
     DeactivationManager deaManager = new DeactivationManager("npi_deactivated");
     TableReader tableReader = new TableReader("datasource=127.0.0.1;port=3306;username=root;password=;database=test_database;");
     Entry testEntry = new Entry(new List<string>(new string[]{"123456"}));
-    string updateFileLoc = "";
-    string deactivateFileLoc = "";
+    string updateFileLoc = "UpdateTestSnippit1.csv";
+    string deactivateFileLoc = "UpdateTestSnippit1.csv";
     //tests for add
     public UnitTest1()
     {
@@ -119,10 +119,10 @@ public class UnitTest1
     {
         tableReader.readUpdateFile(updateFileLoc);
         conn.Open();
-        testCom = new MySqlCommand(proManager.FindExisting("123456"), conn);
+        testCom = new MySqlCommand(proManager.FindExisting("1205839859"), conn);
         int result = int.Parse(testCom.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(result, 123456, "testing applying an update file on an empty db");
+        Assert.AreEqual(result, 1205839859, "testing applying an update file on an empty db");
     }
 
 
@@ -133,7 +133,7 @@ public class UnitTest1
     {
         tableReader.readUpdateFile(updateFileLoc);
         //use the same file that was used to update, should cause the table to be empty
-        tableReader.readDeactivateFile(updateFileLoc);
+        tableReader.readDeactivateFile(deactivateFileLoc);
         conn.Open();
         com.CommandText = "SELECT COUNT(*) FROM organization";
         int result = int.Parse(com.ExecuteScalar().ToString());
