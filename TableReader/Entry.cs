@@ -11,7 +11,7 @@ public class Entry
 		values = inValues;
 
 		//Gets the second value of input, the Entity type code
-		if (string.isNullOrEmpty (values [1])) {
+		if (string.IsNullOrEmpty (values [1])) {
 			entryType = EntryType.Deactivate;
 		} else {
 			//Converts the recieved string input to an int, then casts to an EntityType

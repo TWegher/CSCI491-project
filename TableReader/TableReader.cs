@@ -28,7 +28,7 @@ public class TableReader
         while (!sr.EndOfStream)
         {
             string line = sr.ReadLine();
-			Entry entry = new Entry (line.Split (','));
+			Entry entry = new Entry (newList<string>(line.Split (',')));
 			entries.Add(entry);
         }
 
@@ -38,15 +38,18 @@ public class TableReader
 			case EntryType.Provider:
 				{
 					updateTable(proManager, curEntry);
+                        break;
 				}
 			case EntryType.Organization:
 				{
 					updateTable(orgManager, curEntry);
+                        break;
 				}
 			//TODO: Ask client what should be done if the entry is not currently found
 			case EntryType.Deactivate:
 				{
 					deactivateEntity (curEntry);
+                        break;
 				}
 			}
         }
