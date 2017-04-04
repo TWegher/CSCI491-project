@@ -14,7 +14,8 @@ public class TableReader
     MySqlCommand command = new MySqlCommand();
 
 	OrganizationManager orgManager = new OrganizationManager ("npi_organization_data");
-
+	ProviderManager proManager = new ProviderManager ("npi_provider_data");
+	DeactivationManager deaManager = new DeactivationManager ("npi_deactivated");
 
     private void readUpdateFile(string fileLocation)
     {
@@ -36,11 +37,11 @@ public class TableReader
 			switch (curEntry.entryType) {
 			case EntryType.Provider:
 				{
-					updateTable(proManager, curEntry, true);
+					updateTable(proManager, curEntry);
 				}
 			case EntryType.Organization:
 				{
-					updateTable(orgManager, curEntry, true);
+					updateTable(orgManager, curEntry);
 				}
 			//TODO: Ask client what should be done if the entry is not currently found
 			case EntryType.Deactivate:
@@ -62,8 +63,7 @@ public class TableReader
 
 		//If the database was not able to update the entity, attempt to add it instead
 		if (!tryCommand(query)) {
-			query = tableManager.AddEntity(entry);
-			TryCommand (query);
+			tryCommand(tableManager.AddEntity(entry));
 		}  
     }
 
@@ -71,30 +71,38 @@ public class TableReader
 		
 		string query = deaManager.UpdateEntity (entry);
 
-		if (tryCommand (query)) {
-			proManager.DeactivateEntity (entry.values [0]);
-			orgManager.DeactivateEntity (entry.values [0]);
+		if (!tryCommand (query)) {
+			tryCommand (deaManager.AddEntity (entry.values [0]));
 		}
+		tryCommand(proManager.DeactivateEntity (entry.values [0]));
+		tryCommand(orgManager.DeactivateEntity (entry.values [0]));
 	}
 
 	private bool tryCommand(string query){
 
+		//Stores the number of effected rows by the executed command
+		int numMatched;
+
 		command = new MySqlCommand(query, databaseConnection);
 		command.CommandTimeout = 30;
 
-		try
-		{
+		try{
 			databaseConnection.Open();
-			reader = command.ExecuteReader();
+			//reader = command.ExecuteReader();
+			numMatched = command.ExecuteNonQuery();
 
 			databaseConnection.Close();
 		}
-		catch (Exception ex)
-		{
+		catch (Exception ex){
 			return false;
 		}
 
-		return true;
+		//Only one row should ever be effected by a given command
+		if (numMatched == 1) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 }
