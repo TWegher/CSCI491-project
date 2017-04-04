@@ -10,7 +10,7 @@ public class DeactivationManager : IDataManager
 	}
 
     public string FindExisting(string NPINumber){
-        string query = "SELECT * FROM " + tableName + " WHERE NPI=" + NPINumber + " ;";
+        string query = "SELECT * FROM " + tableName + " WHERE NPI=" + NPINumber + "";
         return query;
     }
 
@@ -22,7 +22,7 @@ public class DeactivationManager : IDataManager
     {
         string command = "INSERT INTO " + tableName + "(NPI, DeactivaitionDate) VALUES (" +
             entry.NPI + ", '" +
-            entry.deactivationDate + "');";
+            entry.deactivationDate + "')";
 
         return command;
     }
