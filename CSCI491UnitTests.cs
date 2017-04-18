@@ -21,12 +21,24 @@ public class UnitTest1
     ProviderManager proManager = new ProviderManager("npi_provider_data");
     DeactivationManager deaManager = new DeactivationManager("npi_deactivated");
     TableReader tableReader = new TableReader("datasource=127.0.0.1;port=3306;username=root;password=;database=test_database;");
-    Entry testEntry = new Entry(new List<string>(new string[]{"123456"}));
+    //Entry testEntry = new Entry(new List<string>(new string[]{"123456", "1"}));
+    Entry testOrgEntry;
+    Entry testProvEntry;
     string updateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
     string deactivateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
     //tests for add
     public UnitTest1()
     {
+        List<string> list = new List<string>();
+        list.Add("123456");
+        for(int i=0; i < 312; i++)
+        {
+            list.Add("0");
+        }
+        list.Insert(1, "2");
+        testOrgEntry = new Entry(list);
+        list.Insert(1, "1");
+        testProvEntry = new Entry(list);
         initConn.Open();
         testCom = new MySqlCommand("mysqldump -u root –p  -d nppes_1|mysql -u root -p test_database;", initConn);
         testCom.ExecuteNonQuery();
@@ -39,7 +51,7 @@ public class UnitTest1
     {
         clearDatabase();
         conn.Open();
-        testCom =  new MySqlCommand(orgManager.AddEntity(testEntry), conn);
+        testCom =  new MySqlCommand(orgManager.AddEntity(testOrgEntry), conn);
         testCom.ExecuteNonQuery();
         com.CommandText = "SELECT npi FROM npi_organization_data WHERE npi == 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
@@ -52,7 +64,7 @@ public class UnitTest1
     {
         clearDatabase();
         conn.Open();
-        testCom = new MySqlCommand(orgManager.AddEntity(testEntry), conn);
+        testCom = new MySqlCommand(orgManager.AddEntity(testOrgEntry), conn);
         testCom.ExecuteNonQuery();
         testCom.ExecuteNonQuery();
         com.CommandText = "SELECT COUNT(*) FROM npi_organization_data";
@@ -67,7 +79,7 @@ public class UnitTest1
     {
         clearDatabase();
         conn.Open();
-        testCom = new MySqlCommand(proManager.AddEntity(testEntry),conn);
+        testCom = new MySqlCommand(proManager.AddEntity(testProvEntry),conn);
         testCom.ExecuteNonQuery();
         com.CommandText = "SELECT npi FROM npi_provider_data WHERE npi == 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
@@ -80,7 +92,7 @@ public class UnitTest1
     {
         clearDatabase();
         conn.Open();
-        testCom = new MySqlCommand(proManager.AddEntity(testEntry), conn);
+        testCom = new MySqlCommand(proManager.AddEntity(testProvEntry), conn);
         testCom.ExecuteNonQuery();
         testCom.ExecuteNonQuery();
         com.CommandText = "SELECT COUNT(*) FROM npi_provider_data";
@@ -96,7 +108,7 @@ public class UnitTest1
     {
         clearDatabase();
         conn.Open();
-        testCom = new MySqlCommand(orgManager.AddEntity(testEntry), conn);
+        testCom = new MySqlCommand(orgManager.AddEntity(testOrgEntry), conn);
         testCom.ExecuteNonQuery();
         testCom = new MySqlCommand(orgManager.FindExisting("123456"), conn);
         int result = int.Parse(testCom.ExecuteScalar().ToString());
@@ -109,7 +121,7 @@ public class UnitTest1
     {
         clearDatabase();
         conn.Open();
-        testCom = new MySqlCommand(proManager.AddEntity(testEntry), conn);
+        testCom = new MySqlCommand(proManager.AddEntity(testProvEntry), conn);
         testCom.ExecuteNonQuery();
         testCom = new MySqlCommand(proManager.FindExisting("123456"), conn);
         int result = int.Parse(testCom.ExecuteScalar().ToString());
