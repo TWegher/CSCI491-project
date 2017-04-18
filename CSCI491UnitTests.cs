@@ -16,7 +16,7 @@ public class UnitTest1
 
     //establish connection with test database
     MySqlConnection initConn = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=nppes_1;");
-    MySqlConnection conn;
+    MySqlConnection conn = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=test_database;");
     OrganizationManager orgManager = new OrganizationManager("npi_organization_data");
     ProviderManager proManager = new ProviderManager("npi_provider_data");
     DeactivationManager deaManager = new DeactivationManager("npi_deactivated");
@@ -40,8 +40,9 @@ public class UnitTest1
         list.Insert(1, "1");
         testProvEntry = new Entry(list);
         initConn.Open();
-        testCom = new MySqlCommand("mysqldump -u root –p  -d nppes_1|mysql -u root -p test_database;", initConn);
-        testCom.ExecuteNonQuery();
+        //testCom.Connection = initConn;
+        //testCom = new MySqlCommand("mysqldump -u root –p -d nppes_1 | mysql -u root -p test_database;", initConn);
+        //testCom.ExecuteNonQuery();
         initConn.Close();
         conn = new MySqlConnection("datasource=127.0.0.1;port=3306;username=root;password=;database=test_database;");
         com.Connection = conn;
@@ -53,7 +54,7 @@ public class UnitTest1
         conn.Open();
         testCom =  new MySqlCommand(orgManager.AddEntity(testOrgEntry), conn);
         testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT npi FROM npi_organization_data WHERE npi == 123456";
+        com.CommandText = "SELECT npi FROM npi_organization_data WHERE npi = 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(result, 123456, "testing add organizer to an empty db");
@@ -81,7 +82,7 @@ public class UnitTest1
         conn.Open();
         testCom = new MySqlCommand(proManager.AddEntity(testProvEntry),conn);
         testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT npi FROM npi_provider_data WHERE npi == 123456";
+        com.CommandText = "SELECT npi FROM npi_provider_data WHERE npi = 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(result, 123456, "testing adding provider to an empty db");
@@ -164,11 +165,11 @@ public class UnitTest1
     private void clearDatabase()
     {
         conn.Open();
-        testCom = new MySqlCommand("truncate npi_organization_data");
+        testCom = new MySqlCommand("truncate npi_organization_data",conn);
         testCom.ExecuteNonQuery();
-        testCom = new MySqlCommand("truncate npi_provider_data");
+        testCom = new MySqlCommand("truncate npi_provider_data",conn);
         testCom.ExecuteNonQuery();
-        testCom = new MySqlCommand("truncate npi_deactivated");
+        testCom = new MySqlCommand("truncate npi_deactivated",conn);
         testCom.ExecuteNonQuery();
         conn.Close();
     }
