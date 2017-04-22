@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using System.Net;
 using System.IO.Compression;
 using System.IO;
-
+using HtmlAgilityPack;
+using System.Text.RegularExpressions;
 
 namespace fileDownloader
 {
@@ -16,90 +17,86 @@ namespace fileDownloader
         {
             //create path strings
             string currentDir = Directory.GetCurrentDirectory();
-            string fullDataPath = System.IO.Path.Combine(currentDir, "Full Data"); 
-            string weeklyUpdatePath = System.IO.Path.Combine(currentDir, "Weekly Update"); 
+            string fullDataPath = System.IO.Path.Combine(currentDir, "Monthly Full Data");
+            string weeklyUpdatePath = System.IO.Path.Combine(currentDir, "Weekly Update");
             string monthlyDeactivatePath = System.IO.Path.Combine(currentDir, "Monthly Deactivate");
 
+            Console.WriteLine("Looking for new files...");
             //check for monthly full Data set directory then download
             if (Directory.Exists(fullDataPath))
-                downloadFullData(fullDataPath);
+                downLoadFiles(fullDataPath, "Monthly Full Data");
             else
             {
                 System.IO.Directory.CreateDirectory(fullDataPath);
-                downloadFullData(fullDataPath);
+                downLoadFiles(fullDataPath, "Monthly Full Data");
             }
 
-            //check for weekly update directory then download
+            ////check for weekly update directory then download
             if (Directory.Exists(weeklyUpdatePath))
-                downloadWeeklyUpdate(weeklyUpdatePath);
+                downLoadFiles(weeklyUpdatePath, "Weekly Update");
             else
             {
                 System.IO.Directory.CreateDirectory(weeklyUpdatePath);
-                downloadWeeklyUpdate(weeklyUpdatePath);
+                downLoadFiles(weeklyUpdatePath, "Weekly Update");
             }
 
-            //check for monthly Deactivate directory then download
+            ////check for monthly Deactivate directory then download
             if (Directory.Exists(monthlyDeactivatePath))
-                downloadMonthlyDeactivate(monthlyDeactivatePath);
+                downLoadFiles(monthlyDeactivatePath, "Monthly Deactivate");
             else
             {
                 System.IO.Directory.CreateDirectory(monthlyDeactivatePath);
-                downloadMonthlyDeactivate(monthlyDeactivatePath);
+                downLoadFiles(monthlyDeactivatePath, "Monthly Deactivate");
             }
-
+            Console.WriteLine("Done!");
 
         }
 
-        //download and unzip weekly update file
-        public static void downloadWeeklyUpdate(string path)
+        public static void downLoadFiles(string path, string type)
         {
-            WebClient Client = new WebClient();
-            string dateSting = "041017_041617";
-            string pathString = System.IO.Path.Combine(path, dateSting);
-            if (Directory.Exists(pathString))
-                Console.WriteLine("Most Recent Weekly Update File Download Already Exists.");
-            else
+            string curMonth = DateTime.Now.ToString("MM");
+            HtmlWeb hw = new HtmlWeb();
+            HtmlDocument doc = hw.Load("http://download.cms.gov/nppes/NPI_Files.html");
+            foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
             {
-                System.IO.Directory.CreateDirectory(pathString);
-                Client.DownloadFile("http://download.cms.gov/nppes/NPPES_Data_Dissemination_041017_041617_Weekly.zip", @"C:\Users\tim.wegher\Documents\Visual Studio 2015\Projects\fileDownloader\fileDownloader\bin\Debug\Weekly Update\041017_041617\041017_041617.zip");
-                string zipPath = System.IO.Path.Combine(pathString, "041017_041617.zip");
-                ZipFile.ExtractToDirectory(zipPath, pathString);
+                string hrefValue = link.GetAttributeValue("href", string.Empty);
+                if (!hrefValue.Contains(".html"))
+                {
+                    string dateString = Regex.Match(hrefValue, @"\d+_?\d+").Value;
+                    string downloadType = fileType(dateString);
+                    if (downloadType.Equals(type))
+                    {
+                        if (dateString.Length == 4)
+                            dateString = curMonth + dateString;
+                        string directoryPath = path + "\\" + dateString;
+                        if (!Directory.Exists(directoryPath))
+                        {
+                            WebClient Client = new WebClient();
+                            Console.WriteLine("Downloading " + downloadType + " " + dateString + "...");
+                            System.IO.Directory.CreateDirectory(directoryPath);
+                            string downloadLink = "http://download.cms.gov/nppes" + (hrefValue.Remove(0, 1));
+                            string zipName = dateString + ".zip";
+                            string savePath = path + "\\" + dateString + '\\' + zipName;
+                            Client.DownloadFile(downloadLink, savePath);
+                            ZipFile.ExtractToDirectory(savePath, directoryPath);
+                            Console.WriteLine("Extracting...");
+                        }
+                    }
+                }
             }
         }
 
-        //download and unzip monthly deactivate file
-        public static void downloadMonthlyDeactivate(string path)
+        public static string fileType(string fileName)
         {
-            WebClient Client = new WebClient();
-            string dateSting = "041117";
-            string pathString = System.IO.Path.Combine(path, dateSting);
-            if (Directory.Exists(pathString))
-                Console.WriteLine("Most Recent Mothly Deactivate File Download Already Exists.");
+            if (fileName.Length == 4)
+                return "Monthly Full Data";
             else
-            {
-                System.IO.Directory.CreateDirectory(pathString);
-                Client.DownloadFile("http://download.cms.gov/nppes/NPPES_Deactivated_NPI_Report_041117.zip", @"C:\Users\tim.wegher\Documents\Visual Studio 2015\Projects\fileDownloader\fileDownloader\bin\Debug\Monthly Deactivate\041117\041117.zip");
-                string zipPath = System.IO.Path.Combine(pathString, "041117.zip");
-                ZipFile.ExtractToDirectory(zipPath, pathString);
-            }
+                if (fileName.Length == 6)
+                return "Monthly Deactivate";
+            else
+                return "Weekly Update";
         }
 
-        //download and unzip full data file
-        public static void downloadFullData(string path)
-        {
-            WebClient Client = new WebClient();
-            string dateSting = "April_2017";
-            string pathString = System.IO.Path.Combine(path, dateSting);
-            if (Directory.Exists(pathString))
-                Console.WriteLine("Most Recent Mothly Full Data File Download Already Exists.");
-            else
-            {
-                System.IO.Directory.CreateDirectory(pathString);
-                Client.DownloadFile("http://download.cms.gov/nppes/NPPES_Data_Dissemination_April_2017.zip", @"C:\Users\tim.wegher\Documents\Visual Studio 2015\Projects\fileDownloader\fileDownloader\bin\Debug\Full Data\April_2017\April_2017.zip");
-                string zipPath = System.IO.Path.Combine(pathString, "April_2017.zip");
-                ZipFile.ExtractToDirectory(zipPath, pathString);
-            }
-        }
     }
-}
- 
+
+    }      
