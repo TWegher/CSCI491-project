@@ -31,7 +31,7 @@ namespace fileDownloader
                 downLoadFiles(fullDataPath, "Monthly Full Data");
             }
 
-            ////check for weekly update directory then download
+            //check for weekly update directory then download
             if (Directory.Exists(weeklyUpdatePath))
                 downLoadFiles(weeklyUpdatePath, "Weekly Update");
             else
@@ -40,7 +40,7 @@ namespace fileDownloader
                 downLoadFiles(weeklyUpdatePath, "Weekly Update");
             }
 
-            ////check for monthly Deactivate directory then download
+            //check for monthly Deactivate directory then download
             if (Directory.Exists(monthlyDeactivatePath))
                 downLoadFiles(monthlyDeactivatePath, "Monthly Deactivate");
             else
@@ -50,8 +50,15 @@ namespace fileDownloader
             }
             Console.WriteLine("Done!");
 
-        }
+            //print to the console
+            using (StreamReader r = File.OpenText("log.txt"))
+            {
+                DumpLog(r);
+            }
+        
 
+    }
+        //check npes download site for new downloads.Then download and extract.
         public static void downLoadFiles(string path, string type)
         {
             string curMonth = DateTime.Now.ToString("MM");
@@ -73,6 +80,13 @@ namespace fileDownloader
                         {
                             WebClient Client = new WebClient();
                             Console.WriteLine("Downloading " + downloadType + " " + dateString + "...");
+
+                            //printing to the log file 
+                            using (StreamWriter w = File.AppendText("log.txt"))
+                            {
+                                Log("Downloaded " + downloadType + " " + dateString, w);
+                            }
+
                             System.IO.Directory.CreateDirectory(directoryPath);
                             string downloadLink = "http://download.cms.gov/nppes" + (hrefValue.Remove(0, 1));
                             string zipName = dateString + ".zip";
@@ -86,6 +100,7 @@ namespace fileDownloader
             }
         }
 
+        //helper funtion for matching download file type
         public static string fileType(string fileName)
         {
             if (fileName.Length == 4)
@@ -97,6 +112,27 @@ namespace fileDownloader
                 return "Weekly Update";
         }
 
+        //for printing to a log file
+        public static void Log(string logMessage, TextWriter w)
+        {
+            w.Write("\r\nLog Entry : ");
+            w.Write("{0} {1} =>", DateTime.Now.ToLongTimeString(),
+                DateTime.Now.ToLongDateString());
+            w.WriteLine("  :{0}", logMessage);
+        }
+
+        //print to the console
+        public static void DumpLog(StreamReader r)
+        {
+            string line;
+            while ((line = r.ReadLine()) != null)
+            {
+                Console.WriteLine(line);
+            }
+        }
+
     }
+
+
 
     }      
