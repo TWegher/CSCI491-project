@@ -29,6 +29,7 @@ public class DeactivationManager : IDataManager
 
     public string UpdateEntity(Entry entry)
     {
-        throw new NotImplementedException();
+        string command = "UPDATE " + tableName + " SET DeactivationDate = " + entry.deactivationDate + " WHERE NPI=" + entry.NPI + "";
+        return command;
     }
 }

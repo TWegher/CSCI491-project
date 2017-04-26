@@ -13,6 +13,7 @@ namespace fileDownloader
 {
     class Downloader
     {
+        /*
         static void Main(string[] args)
         {
             //create path strings
@@ -23,31 +24,53 @@ namespace fileDownloader
 
             Console.WriteLine("Looking for new files...");
             //check for monthly full Data set directory then download
-            if (Directory.Exists(fullDataPath))
-                downLoadFiles(fullDataPath, "Monthly Full Data");
-            else
-            {
+            if (!Directory.Exists(fullDataPath)) { 
                 System.IO.Directory.CreateDirectory(fullDataPath);
-                downLoadFiles(fullDataPath, "Monthly Full Data");
             }
+            downloadFiles(fullDataPath, "Monthly Full Data");
+
 
             //check for weekly update directory then download
-            if (Directory.Exists(weeklyUpdatePath))
-                downLoadFiles(weeklyUpdatePath, "Weekly Update");
-            else
-            {
+            if (!Directory.Exists(weeklyUpdatePath)){
                 System.IO.Directory.CreateDirectory(weeklyUpdatePath);
-                downLoadFiles(weeklyUpdatePath, "Weekly Update");
             }
 
+            downloadFiles(weeklyUpdatePath, "Weekly Update");
+
             //check for monthly Deactivate directory then download
-            if (Directory.Exists(monthlyDeactivatePath))
-                downLoadFiles(monthlyDeactivatePath, "Monthly Deactivate");
-            else
-            {
+            if (!Directory.Exists(monthlyDeactivatePath)){
                 System.IO.Directory.CreateDirectory(monthlyDeactivatePath);
-                downLoadFiles(monthlyDeactivatePath, "Monthly Deactivate");
             }
+
+            downloadFiles(monthlyDeactivatePath, "Monthly Deactivate");
+            
+            Console.WriteLine("Done!");
+
+            //print to the console
+            using (StreamReader r = File.OpenText("log.txt")){
+                DumpLog(r);
+            }
+        }
+        */
+
+        string currentDir;
+
+        public Downloader()
+        {
+            currentDir = Directory.GetCurrentDirectory();
+        }
+
+        public void downloadFile(string type)
+        {
+            string path = System.IO.Path.Combine(currentDir, type);
+
+            Console.WriteLine("Looking for new files...");
+            if (!Directory.Exists(path))
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            downloadFiles(path, type);
+
             Console.WriteLine("Done!");
 
             //print to the console
@@ -55,11 +78,10 @@ namespace fileDownloader
             {
                 DumpLog(r);
             }
-        
+        }
 
-    }
         //check npes download site for new downloads.Then download and extract.
-        public static void downLoadFiles(string path, string type)
+        public static void downloadFiles(string path, string type)
         {
             string curMonth = DateTime.Now.ToString("MM");
             HtmlWeb hw = new HtmlWeb();
@@ -79,7 +101,7 @@ namespace fileDownloader
                         if (!Directory.Exists(directoryPath))
                         {
                             WebClient Client = new WebClient();
-                            Console.WriteLine("Downloading " + downloadType + " " + dateString + "...");
+                            Console.WriteLine("Downloading " + downloadType + " " + dateString + " ...");
 
                             //printing to the log file 
                             using (StreamWriter w = File.AppendText("log.txt"))
@@ -104,12 +126,17 @@ namespace fileDownloader
         public static string fileType(string fileName)
         {
             if (fileName.Length == 4)
+            {
                 return "Monthly Full Data";
-            else
-                if (fileName.Length == 6)
+            }
+            else if (fileName.Length == 6)
+            {
                 return "Monthly Deactivate";
+            }
             else
+            {
                 return "Weekly Update";
+            }
         }
 
         //for printing to a log file
@@ -130,9 +157,5 @@ namespace fileDownloader
                 Console.WriteLine(line);
             }
         }
-
     }
-
-
-
-    }      
+}
