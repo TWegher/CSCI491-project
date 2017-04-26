@@ -118,6 +118,7 @@ public class TableReader
 			databaseConnection.Close();
 		}
 		catch (Exception ex){
+			databaseConnection.Close();
 			return false;
 		}
 
