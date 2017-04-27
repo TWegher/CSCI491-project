@@ -24,17 +24,19 @@ public class UnitTest1
     //Entry testEntry = new Entry(new List<string>(new string[]{"123456", "1"}));
     Entry testOrgEntry;
     Entry testProvEntry;
-    string updateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
-    string deactivateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
+    Entry testDeaEntry;
+    string updateFileLoc = "../../TestFiles/UpdateTestSnippit1.csv";
+    string deactivateFileLoc = "../../TestFiles/UpdateTestSnippit1.csv";
     //tests for add
     public UnitTest1()
     {
         List<string> list = new List<string>();
         list.Add("123456");
-        for(int i=0; i < 312; i++)
+        for(int i=0; i < 313; i++)
         {
             list.Add("0");
         }
+        testDeaEntry = new Entry(list);
         list.Insert(1, "2");
         testOrgEntry = new Entry(list);
         list.Insert(1, "1");
@@ -57,7 +59,7 @@ public class UnitTest1
         com.CommandText = "SELECT npi FROM npi_organization_data WHERE npi = 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(result, 123456, "testing add organizer to an empty db");
+        Assert.AreEqual(123456, result, "testing add organizer to an empty db");
     }
 
     [TestMethod]
@@ -67,11 +69,15 @@ public class UnitTest1
         conn.Open();
         testCom = new MySqlCommand(orgManager.AddEntity(testOrgEntry), conn);
         testCom.ExecuteNonQuery();
-        testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT COUNT(*) FROM npi_organization_data";
-        int result = int.Parse(com.ExecuteScalar().ToString());
-        conn.Close();
-        Assert.AreEqual(result, 1, "testing applying duplicate organization");
+        try
+        {
+            testCom.ExecuteNonQuery();
+        }
+        catch (MySqlException e)
+        {
+            conn.Close();
+            Assert.AreEqual(1062, e.Number, "adding a duplicate entry should fail with error code 1062");
+        }
     }
 
 
@@ -85,7 +91,7 @@ public class UnitTest1
         com.CommandText = "SELECT npi FROM npi_provider_data WHERE npi = 123456";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(result, 123456, "testing adding provider to an empty db");
+        Assert.AreEqual(123456, result, "testing adding provider to an empty db");
     }
 
     [TestMethod]
@@ -95,11 +101,15 @@ public class UnitTest1
         conn.Open();
         testCom = new MySqlCommand(proManager.AddEntity(testProvEntry), conn);
         testCom.ExecuteNonQuery();
-        testCom.ExecuteNonQuery();
-        com.CommandText = "SELECT COUNT(*) FROM npi_provider_data";
-        int result = int.Parse(com.ExecuteScalar().ToString());
-        conn.Close();
-        Assert.AreEqual(result, 1, "testing applying duplicate provider");
+        try
+        {
+            testCom.ExecuteNonQuery();
+        }
+        catch (MySqlException e)
+        {
+            conn.Close();
+            Assert.AreEqual(1062, e.Number, "adding a duplicate entry should fail with error code 1062");
+        }
     }
 
     //tests for find
@@ -114,7 +124,7 @@ public class UnitTest1
         testCom = new MySqlCommand(orgManager.FindExisting("123456"), conn);
         int result = int.Parse(testCom.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(result, 123456, "testing finding an organization on an empty db");
+        Assert.AreEqual(123456, result, "testing adding andfinding an organization on an empty db");
     }
 
     [TestMethod]
@@ -127,7 +137,20 @@ public class UnitTest1
         testCom = new MySqlCommand(proManager.FindExisting("123456"), conn);
         int result = int.Parse(testCom.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(result, 123456, "testing finding an organization on an empty db");
+        Assert.AreEqual(123456, result, "testing adding andfinding an organization on an empty db");
+    }
+
+    [TestMethod]
+    public void testFindDeavctivate()
+    {
+        clearDatabase();
+        conn.Open();
+        testCom = new MySqlCommand(deaManager.AddEntity(testDeaEntry), conn);
+        testCom.ExecuteNonQuery();
+        testCom = new MySqlCommand(deaManager.FindExisting("123456"), conn);
+        int result = int.Parse(testCom.ExecuteScalar().ToString());
+        conn.Close();
+        Assert.AreEqual(123456, result, "testing adding and finding an organization on an empty db");
     }
 
 
@@ -139,10 +162,10 @@ public class UnitTest1
         clearDatabase();
         tableReader.readUpdateFile(updateFileLoc);
         conn.Open();
-        testCom = new MySqlCommand(proManager.FindExisting("1205839859"), conn);
-        int result = int.Parse(testCom.ExecuteScalar().ToString());
+        testCom = new MySqlCommand(proManager.FindExisting("1275857534"), conn);
+        string result = testCom.ExecuteScalar().ToString();
         conn.Close();
-        Assert.AreEqual(result, 1205839859, "testing applying an update file on an empty db");
+        Assert.AreEqual("1275857534", result, "testing applying an update file on an empty db");
     }
 
 
@@ -159,7 +182,22 @@ public class UnitTest1
         com.CommandText = "SELECT COUNT(*) FROM npi_organization_data";
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(result, 0, "testing applying deactivate that should remove the only row causing it to be empty");
+        Assert.AreEqual(0, result, "testing applying deactivate that should remove the only row causing it to be empty");
+    }
+
+    [TestMethod]
+    public void testRemoveFromDeavctivate()
+    {
+        clearDatabase();
+        conn.Open();
+        testCom = new MySqlCommand(deaManager.AddEntity(testDeaEntry), conn);
+        testCom.ExecuteNonQuery();
+        testCom = new MySqlCommand(deaManager.DeactivateEntity("123456"), conn);
+        testCom.ExecuteNonQuery();
+        com.CommandText = "SELECT COUNT(*) FROM npi_deactivated";
+        int result = int.Parse(com.ExecuteScalar().ToString());
+        conn.Close();
+        Assert.AreEqual(0, result, "testing removing entity from deactivated table");
     }
 
     private void clearDatabase()
