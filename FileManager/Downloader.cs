@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -82,7 +82,7 @@ class Downloader
 
                         string[] extractedFiles = Directory.GetFiles(directoryPath, "*");
 
-                        downloadedFilePaths.Add(extractedFiles[0]);
+                        downloadedFilePaths.Add(extractedFiles[1]);
 
                         Console.WriteLine("Extracting...");
                     }
