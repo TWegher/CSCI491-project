@@ -168,6 +168,16 @@ public class UnitTest1
         Assert.AreEqual("1275857534", result, "testing applying an update file on an empty db");
     }
 
+	public void testAdd()
+	{
+		clearDatabase();
+		tableReader.readFullFile(updateFileLoc);
+		conn.Open();
+		testCom = new MySqlCommand(proManager.FindExisting("1275857534"), conn);
+		string result = testCom.ExecuteScalar().ToString();
+		conn.Close();
+		Assert.AreEqual("1275857534", result, "testing applying an update file on an empty db");
+	}
 
     //tests for deactivate
 
