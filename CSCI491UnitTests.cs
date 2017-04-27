@@ -24,17 +24,19 @@ public class UnitTest1
     //Entry testEntry = new Entry(new List<string>(new string[]{"123456", "1"}));
     Entry testOrgEntry;
     Entry testProvEntry;
-    string updateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
-    string deactivateFileLoc = "TestFiles/UpdateTestSnippit1.csv";
+    Entry testDeaEntry;
+    string updateFileLoc = "../../TestFiles/UpdateTestSnippit1.csv";
+    string deactivateFileLoc = "../../TestFiles/UpdateTestSnippit1.csv";
     //tests for add
     public UnitTest1()
     {
         List<string> list = new List<string>();
         list.Add("123456");
-        for(int i=0; i < 312; i++)
+        for(int i=0; i < 313; i++)
         {
             list.Add("0");
         }
+        testDeaEntry = new Entry(list);
         list.Insert(1, "2");
         testOrgEntry = new Entry(list);
         list.Insert(1, "1");
@@ -122,7 +124,7 @@ public class UnitTest1
         testCom = new MySqlCommand(orgManager.FindExisting("123456"), conn);
         int result = int.Parse(testCom.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(123456, result, "testing finding an organization on an empty db");
+        Assert.AreEqual(123456, result, "testing adding andfinding an organization on an empty db");
     }
 
     [TestMethod]
@@ -135,7 +137,20 @@ public class UnitTest1
         testCom = new MySqlCommand(proManager.FindExisting("123456"), conn);
         int result = int.Parse(testCom.ExecuteScalar().ToString());
         conn.Close();
-        Assert.AreEqual(123456, result, "testing finding an organization on an empty db");
+        Assert.AreEqual(123456, result, "testing adding andfinding an organization on an empty db");
+    }
+
+    [TestMethod]
+    public void testFindDeavctivate()
+    {
+        clearDatabase();
+        conn.Open();
+        testCom = new MySqlCommand(deaManager.AddEntity(testDeaEntry), conn);
+        testCom.ExecuteNonQuery();
+        testCom = new MySqlCommand(deaManager.FindExisting("123456"), conn);
+        int result = int.Parse(testCom.ExecuteScalar().ToString());
+        conn.Close();
+        Assert.AreEqual(123456, result, "testing adding and finding an organization on an empty db");
     }
 
 
@@ -168,6 +183,21 @@ public class UnitTest1
         int result = int.Parse(com.ExecuteScalar().ToString());
         conn.Close();
         Assert.AreEqual(0, result, "testing applying deactivate that should remove the only row causing it to be empty");
+    }
+
+    [TestMethod]
+    public void testRemoveFromDeavctivate()
+    {
+        clearDatabase();
+        conn.Open();
+        testCom = new MySqlCommand(deaManager.AddEntity(testDeaEntry), conn);
+        testCom.ExecuteNonQuery();
+        testCom = new MySqlCommand(deaManager.DeactivateEntity("123456"), conn);
+        testCom.ExecuteNonQuery();
+        com.CommandText = "SELECT COUNT(*) FROM npi_deactivated";
+        int result = int.Parse(com.ExecuteScalar().ToString());
+        conn.Close();
+        Assert.AreEqual(0, result, "testing removing entity from deactivated table");
     }
 
     private void clearDatabase()
