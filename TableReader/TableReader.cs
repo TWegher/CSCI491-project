@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 public class TableReader
 {
     //Initialize the connection
-    string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=nppes_1;";
+    string connectionString;
 
     //MySqlDataReader reader;
     MySqlConnection databaseConnection;
@@ -23,9 +23,13 @@ public class TableReader
             this.connectionString = connectionString;
         } 
         databaseConnection = new MySqlConnection(this.connectionString);
-        orgManager = new OrganizationManager("npi_organization_data");
-        proManager = new ProviderManager("npi_provider_data");
-        deaManager = new DeactivationManager("npi_deactivated");
+    }
+
+    private void initializeManagers(string organizationName, string providerName, string deactivationName)
+    {
+        orgManager = new OrganizationManager(organizationName);
+        proManager = new ProviderManager(providerName);
+        deaManager = new DeactivationManager(deactivationName);
     }
 
     public void readUpdateFile(string fileLocation)
@@ -45,7 +49,6 @@ public class TableReader
 					updateTable(orgManager, curEntry);
                         break;
 				}
-			//TODO: Ask client what should be done if the entry is not currently found
 			case EntryType.Deactivate:
 				{
 					deactivateEntity (curEntry);
@@ -59,7 +62,6 @@ public class TableReader
     {
         List<Entry> entries = generateEntries(fileLocation);
 
-        //TODO: finish implementation of Method
         //As each entry in the deactivation list is know to be of EntryType.Deactivate, a switch check is unneccesary
         foreach(Entry curEntry in entries){
             deactivateEntity(curEntry);
@@ -68,10 +70,8 @@ public class TableReader
 
 	private void updateTable(IDataManager tableManager, Entry entry)
     {
-		string query = tableManager.UpdateEntity (entry);
-
 		//If the database was not able to update the entity, attempt to add it instead
-		if (!tryCommand(query)) {
+		if (!tryCommand(tableManager.UpdateEntity(entry))) {
 			tryCommand(tableManager.AddEntity(entry));
 		}  
     }
@@ -96,12 +96,11 @@ public class TableReader
     }
 
 	private void deactivateEntity(Entry entry){
-		
-		string query = deaManager.UpdateEntity (entry);
 
-		if (!tryCommand (query)) {
+		if (!tryCommand (deaManager.UpdateEntity(entry))) {
 			tryCommand (deaManager.AddEntity (entry));
 		}
+
 		tryCommand(proManager.DeactivateEntity (entry.NPI));
 		tryCommand(orgManager.DeactivateEntity (entry.NPI));
 	}
@@ -125,12 +124,11 @@ public class TableReader
 			return false;
 		}
 
-		//Only one row should ever be effected by a given command
+		//Only one row should ever be effected by a given command, as NPI is the primary key and passed as the argument
 		if (numMatched == 1) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
 }
