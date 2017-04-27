@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 public class TableReader
 {
     //Initialize the connection
-    string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=nppes_1;";
+    string connectionString;
 
     //MySqlDataReader reader;
     MySqlConnection databaseConnection;
@@ -23,9 +23,13 @@ public class TableReader
             this.connectionString = connectionString;
         } 
         databaseConnection = new MySqlConnection(this.connectionString);
-        orgManager = new OrganizationManager("npi_organization_data");
-        proManager = new ProviderManager("npi_provider_data");
-        deaManager = new DeactivationManager("npi_deactivated");
+    }
+
+    private void initializeManagers(string organizationName, string providerName, string deactivationName)
+    {
+        orgManager = new OrganizationManager(organizationName);
+        proManager = new ProviderManager(providerName);
+        deaManager = new DeactivationManager(deactivationName);
     }
 
     public void readUpdateFile(string fileLocation)
@@ -45,7 +49,6 @@ public class TableReader
 					updateTable(orgManager, curEntry);
                         break;
 				}
-
 			case EntryType.Deactivate:
 				{
 					deactivateEntity (curEntry);
@@ -118,7 +121,6 @@ public class TableReader
 			databaseConnection.Close();
 		}
 		catch (Exception ex){
-			databaseConnection.Close();
 			return false;
 		}
 
