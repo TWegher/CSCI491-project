@@ -7,6 +7,7 @@ public class TableReader
 {
     //Initialize the connection
     string connectionString = "datasource=127.0.0.1;port=3306;username=root;password=;database=nppes_1;";
+	string schemaLocation = System.IO.Path.GetFullPath(Directory.GetCurrentDirectory()+ @"\schema.txt");
 
     //MySqlDataReader reader;
     MySqlConnection databaseConnection;
@@ -206,6 +207,7 @@ public class TableReader
     private void applySchema()
     {
         string deleteDatabase = "DROP DATABASE ";
+		//string schema = System.IO.File.ReadAllText (schemaLocation);
         string schema = "CREATE DATABASE  IF NOT EXISTS `nppes_1` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci */;" +
             "\nUSE `nppes_1`;\n-- MySQL dump 10.13  Distrib 5.7.9, for Win64 (x86_64)\n--\n-- Host: 192.168.1.151    Database: nppe" +
             "s\n-- ------------------------------------------------------\n-- Server version\t5.6.26-log\n\n/*!40101 SET @OLD_CHARA" +
