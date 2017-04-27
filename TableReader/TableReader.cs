@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
@@ -56,6 +56,10 @@ public class TableReader
 				}
 			}
         }
+        using (StreamWriter w = File.AppendText("log.txt"))
+        {
+            Log("Update File Applied to Database",w);
+        }
     }
 
     public void readDeactivationFile(string fileLocation)
@@ -65,6 +69,10 @@ public class TableReader
         //As each entry in the deactivation list is know to be of EntryType.Deactivate, a switch check is unneccesary
         foreach(Entry curEntry in entries){
             deactivateEntity(curEntry);
+        }
+        using (StreamWriter w = File.AppendText("log.txt"))
+        {
+            Log("Deactivation File Applied to Database", w);
         }
     }
 
@@ -131,4 +139,13 @@ public class TableReader
 			return false;
 		}
 	}
+
+    //for printing to a log file
+    private void Log(string logMessage, TextWriter w)
+    {
+        w.Write("\r\nLog Entry : ");
+        w.Write("{0} {1} =>", DateTime.Now.ToLongTimeString(),
+            DateTime.Now.ToLongDateString());
+        w.WriteLine("  :{0}", logMessage);
+    }
 }
